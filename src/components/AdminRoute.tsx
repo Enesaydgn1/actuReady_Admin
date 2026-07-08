@@ -1,15 +1,14 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { Loader2 } from 'lucide-react'
 
 export function AdminRoute() {
-  const { user, isAdmin, loading } = useAuth()
+  const { user, isAdmin, loading, isAdminLoading } = useAuth()
 
-  if (loading) {
+  if (loading || isAdminLoading) {
     return (
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        height: '100vh', background: '#0f172a', color: '#94a3b8', fontSize: 14,
-      }}>
+      <div className="flex items-center justify-center h-screen text-slate-500 gap-2 text-sm">
+        <Loader2 className="w-4 h-4 animate-spin" />
         Yükleniyor...
       </div>
     )

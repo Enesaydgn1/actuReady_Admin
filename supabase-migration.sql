@@ -83,3 +83,38 @@ CREATE POLICY "exam_calendar_admin_write" ON exam_calendar FOR ALL
       SELECT 1 FROM user_profiles WHERE user_id = auth.uid() AND is_admin = TRUE
     )
   );
+
+-- ============================================================
+-- 5. question_bank görsel desteği (yeni kolon + storage bucket)
+-- ============================================================
+
+-- Soru görseli için yeni kolon
+ALTER TABLE question_bank
+  ADD COLUMN IF NOT EXISTS question_image_url TEXT;
+
+-- options_json artık şu formatı destekler:
+-- { "A": { "text": "...", "image_url": "..." }, ... }
+-- Eski format ({ "A": "..." }) geriye dönük okunabilir kalır.
+
+-- Storage bucket: soru görselleri
+INSERT INTO storage.buckets (id, name, public)
+  VALUES ('question-images', 'question-images', true)
+  ON CONFLICT DO NOTHING;
+
+-- Herkese okuma (frontend'de görseller yüklenmesi için)
+CREATE POLICY "question_images_read" ON storage.objects
+  FOR SELECT USING (bucket_id = 'question-images');
+
+-- Sadece admin yükleyebilir
+CREATE POLICY "question_images_admin_write" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'question-images' AND
+    EXISTS (SELECT 1 FROM user_profiles WHERE user_id = auth.uid() AND is_admin = TRUE)
+  );
+
+-- Sadece admin silebilir
+CREATE POLICY "question_images_admin_delete" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'question-images' AND
+    EXISTS (SELECT 1 FROM user_profiles WHERE user_id = auth.uid() AND is_admin = TRUE)
+  );

@@ -169,6 +169,7 @@ export interface Database {
           topic: string
           difficulty: string
           question_text: string
+          question_image_url: string | null
           options_json: Json
           correct_answer: string
           explanation: string | null
@@ -183,6 +184,7 @@ export interface Database {
           topic: string
           difficulty?: string
           question_text: string
+          question_image_url?: string | null
           options_json: Json
           correct_answer: string
           explanation?: string | null
@@ -196,6 +198,7 @@ export interface Database {
           topic?: string
           difficulty?: string
           question_text?: string
+          question_image_url?: string | null
           options_json?: Json
           correct_answer?: string
           explanation?: string | null
@@ -209,6 +212,7 @@ export interface Database {
           exam_type: string
           subject: string
           topic: string
+          difficulty: string
           content_markdown: string
           created_at: string
           updated_at: string
@@ -218,6 +222,7 @@ export interface Database {
           exam_type: string
           subject: string
           topic: string
+          difficulty?: string
           content_markdown: string
           created_at?: string
           updated_at?: string
@@ -226,6 +231,7 @@ export interface Database {
           exam_type?: string
           subject?: string
           topic?: string
+          difficulty?: string
           content_markdown?: string
           updated_at?: string
         }
@@ -260,9 +266,96 @@ export interface Database {
           is_active?: boolean
         }
       }
+      site_settings: {
+        Row: {
+          id: string
+          primary_color: string
+          maintenance_mode: boolean
+          maintenance_message: string
+          announcement_enabled: boolean
+          announcement_text: string
+          announcement_type: 'info' | 'warning' | 'success'
+          announcement_image_url: string | null
+          registration_enabled: boolean
+          roadmap_quiz_question_count: number
+          roadmap_pass_threshold_pct: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          primary_color?: string
+          maintenance_mode?: boolean
+          maintenance_message?: string
+          announcement_enabled?: boolean
+          announcement_text?: string
+          announcement_type?: 'info' | 'warning' | 'success'
+          announcement_image_url?: string | null
+          registration_enabled?: boolean
+          roadmap_quiz_question_count?: number
+          roadmap_pass_threshold_pct?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          primary_color?: string
+          maintenance_mode?: boolean
+          maintenance_message?: string
+          announcement_enabled?: boolean
+          announcement_text?: string
+          announcement_type?: 'info' | 'warning' | 'success'
+          announcement_image_url?: string | null
+          registration_enabled?: boolean
+          roadmap_quiz_question_count?: number
+          roadmap_pass_threshold_pct?: number
+          updated_by?: string | null
+        }
+      }
+      formula_library: {
+        Row: {
+          id: string
+          name: string
+          name_en: string
+          subject: string
+          latex: string
+          description: string
+          tags: string[]
+          example: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          name_en?: string
+          subject: string
+          latex: string
+          description?: string
+          tags?: string[]
+          example?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          name?: string
+          name_en?: string
+          subject?: string
+          latex?: string
+          description?: string
+          tags?: string[]
+          example?: string | null
+          is_active?: boolean
+          updated_at?: string
+        }
+      }
     }
   }
 }
+
+export type SiteSettings = Database['public']['Tables']['site_settings']['Row']
+export type AnnouncementType = 'info' | 'warning' | 'success'
 
 export type UserProfile = Database['public']['Tables']['user_profiles']['Row']
 export type QuizAttempt = Database['public']['Tables']['quiz_attempts']['Row']
@@ -272,3 +365,4 @@ export type LeaderboardEntry = Database['public']['Tables']['monthly_leaderboard
 export type QuestionBankRow = Database['public']['Tables']['question_bank']['Row']
 export type TopicContentRow = Database['public']['Tables']['topic_content']['Row']
 export type ExamCalendarRow = Database['public']['Tables']['exam_calendar']['Row']
+export type FormulaLibraryRow = Database['public']['Tables']['formula_library']['Row']

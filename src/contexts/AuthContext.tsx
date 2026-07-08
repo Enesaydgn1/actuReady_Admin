@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null
   isAdmin: boolean
   loading: boolean
+  isAdminLoading: boolean
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -15,58 +16,111 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   isAdmin: false,
   loading: true,
+  isAdminLoading: false,
 })
+
+async function checkAdmin(userId: string): Promise<boolean> {
+  try {
+    const { data } = await supabase
+      .from('user_profiles')
+      .select('is_admin')
+      .eq('user_id', userId)
+      .maybeSingle()
+    return (data as { is_admin: boolean } | null)?.is_admin === true
+  } catch {
+    return false
+  }
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
-
-  async function checkAdmin(userId: string) {
-    const { data } = await supabase
-      .from('user_profiles')
-      .select('is_admin')
-      .eq('user_id', userId)
-      .maybeSingle()
-    setIsAdmin((data as { is_admin: boolean } | null)?.is_admin === true)
-  }
+  const [isAdminLoading, setIsAdminLoading] = useState(false)
 
   useEffect(() => {
+    let mounted = true
+
+    // .catch() şart: getSession() reddedilirse loading hiç false olmaz ve
+    // AdminRoute sonsuza dek "Yükleniyor..." spinner'ında kalır.
     supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        supabase.auth.signOut()
+      if (!mounted) return
+
+      if (error || !session) {
         setSession(null)
         setUser(null)
         setIsAdmin(false)
-      } else {
-        setSession(session)
-        setUser(session?.user ?? null)
-        if (session?.user) checkAdmin(session.user.id).finally(() => setLoading(false))
-        else setLoading(false)
+        setLoading(false)
+        setIsAdminLoading(false)
+        return
       }
+
+      setSession(session)
+      setUser(session.user)
+      setLoading(false)
+      setIsAdminLoading(true)
+
+      checkAdmin(session.user.id).then((admin) => {
+        if (!mounted) return
+        setIsAdmin(admin)
+        setIsAdminLoading(false)
+      })
+    }).catch(() => {
+      if (!mounted) return
+      setSession(null)
+      setUser(null)
+      setIsAdmin(false)
+      setLoading(false)
+      setIsAdminLoading(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setSession(session)
         setUser(session?.user ?? null)
-        if (session?.user) await checkAdmin(session.user.id)
-        else setIsAdmin(false)
-        setLoading(false)
+        setIsAdminLoading(true)
+
+        if (session?.user) {
+          checkAdmin(session.user.id).then((admin) => {
+            if (!mounted) return
+            setIsAdmin(admin)
+            setIsAdminLoading(false)
+            setLoading(false)
+          })
+        } else {
+          setIsAdmin(false)
+          setIsAdminLoading(false)
+          setLoading(false)
+        }
       } else if (event === 'SIGNED_OUT') {
         setSession(null)
         setUser(null)
         setIsAdmin(false)
+        setIsAdminLoading(false)
+        setLoading(false)
+      } else if ((event as string) === 'TOKEN_REFRESH_FAILED') {
+        setSession(null)
+        setUser(null)
+        setIsAdmin(false)
+        setIsAdminLoading(false)
+        setLoading(false)
+        window.location.href = '/giris'
+      } else {
         setLoading(false)
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, loading }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, loading, isAdminLoading }}>
       {children}
     </AuthContext.Provider>
   )
