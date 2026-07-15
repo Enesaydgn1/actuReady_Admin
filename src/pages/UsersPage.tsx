@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import type { UserProfile, QuizAttempt } from '@/lib/supabase/types'
-import { Search, ShieldCheck, Trash2, Loader2, Eye, CheckCircle2, XCircle, Clock, Zap } from 'lucide-react'
+import { Search, ShieldCheck, Trash2, Loader2, Eye, CheckCircle2, XCircle, Clock, Zap, User } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -73,14 +73,6 @@ export default function UsersPage() {
 
   useEffect(() => { load() }, [])
 
-  const toggleAdmin = async (row: Row) => {
-    const newVal = !row.is_admin
-    const { error } = await supabase.from('user_profiles').update({ is_admin: newVal } as never).eq('id', row.id)
-    if (error) { showToast('Güncelleme başarısız.', false); return }
-    setUsers(prev => prev.map(u => u.id === row.id ? { ...u, is_admin: newVal } : u))
-    showToast(`${row.full_name} ${newVal ? 'admin yapıldı' : 'admin yetkisi alındı'}.`)
-  }
-
   const confirmDelete = async () => {
     if (!deleteTarget) return
     const { error } = await supabase.from('user_profiles').delete().eq('id', deleteTarget.id)
@@ -100,7 +92,7 @@ export default function UsersPage() {
       <PageHeader
         title="Kullanıcı Yönetimi"
         count={users.length}
-        subtitle="Kayıtlı kullanıcıları yönetin ve admin yetkilerini düzenleyin"
+        subtitle="Kayıtlı kullanıcıları yönetin"
       />
 
       <div className="relative mb-4 max-w-xs">
@@ -152,18 +144,17 @@ export default function UsersPage() {
                       </Badge>
                     </td>
                     <td className={TD}>
-                      <button
-                        onClick={() => toggleAdmin(u)}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer"
+                      <span
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border"
                         style={u.is_admin ? {
                           background: 'rgba(245,158,11,0.1)', color: '#f59e0b', borderColor: 'rgba(245,158,11,0.25)',
                         } : {
                           background: 'rgba(255,255,255,0.04)', color: '#64748b', borderColor: 'rgba(148,163,184,0.12)',
                         }}
                       >
-                        {u.is_admin && <ShieldCheck className="w-3.5 h-3.5" />}
+                        {u.is_admin ? <ShieldCheck className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
                         {u.is_admin ? 'Admin' : 'Kullanıcı'}
-                      </button>
+                      </span>
                     </td>
                     <td className={`${TD} text-xs text-slate-600`}>
                       {new Date(u.created_at).toLocaleDateString('tr-TR')}
