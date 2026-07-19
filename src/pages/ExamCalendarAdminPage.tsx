@@ -16,6 +16,7 @@ const EXAM_OPTIONS = [
   { value: 'LEVEL_3', label: 'Aktüer 3' }, { value: 'LEVEL_4', label: 'Aktüer 4' },
   { value: 'SEGEM_TPYS', label: 'SEGEM/TPYS' },
 ]
+const examLabel = (v: string) => EXAM_OPTIONS.find(o => o.value === v)?.label ?? v
 
 const EVENT_TYPES = [
   { value: 'exam',         label: 'Sınav',     color: 'red' as const },
@@ -161,7 +162,7 @@ export default function ExamCalendarAdminPage() {
                       {r.label}
                     </span>
                     <Badge color={evType?.color ?? 'slate'}>{evType?.label ?? r.event_type}</Badge>
-                    <Badge>{r.exam_type}</Badge>
+                    <Badge>{examLabel(r.exam_type)}</Badge>
                   </div>
                   {r.description && (
                     <p className="text-xs text-slate-500 mt-0.5">{r.description}</p>

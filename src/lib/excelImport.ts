@@ -128,8 +128,7 @@ export async function parseQuestionExcel(file: File): Promise<ParseResult> {
     const subject = SUBJECT_MAP[normKey(r.subject)]
     if (!subject) problems.push(`subject geçersiz: "${norm(r.subject)}"`)
 
-    const difficulty = DIFF_MAP[normKey(r.difficulty)]
-    if (!difficulty) problems.push(`difficulty geçersiz: "${norm(r.difficulty)}"`)
+    const difficulty = DIFF_MAP[normKey(r.difficulty)] ?? 'medium'
 
     const topic = norm(r.topic)
     if (!topic) problems.push('topic boş')
@@ -154,7 +153,7 @@ export async function parseQuestionExcel(file: File): Promise<ParseResult> {
     }
 
     valid.push({
-      exam_type: examType!, subject: subject!, topic, difficulty: difficulty!,
+      exam_type: examType!, subject: subject!, topic, difficulty,
       question_text: questionText,
       question_image_url: null,
       options_json: {

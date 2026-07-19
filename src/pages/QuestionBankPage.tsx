@@ -5,7 +5,6 @@ import { downloadTemplate, parseQuestionExcel, type ImportedQuestion, type RowEr
 import type { QuestionBankRow } from '@/lib/supabase/types'
 import { Plus, Sparkles, ArrowLeft, Search, Pencil, Trash2, Loader2, FileDown, FileUp, X } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
-import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
@@ -22,6 +21,7 @@ const EXAM_OPTIONS = [
   { value: 'LEVEL_4', label: 'Aktüer 4' },
   { value: 'SEGEM_TPYS', label: 'SEGEM/TPYS' },
 ]
+const examLabel = (v: string) => EXAM_OPTIONS.find(o => o.value === v)?.label ?? v
 const SUBJECT_OPTIONS = [
   { value: 'matematik', label: 'Matematik' },
   { value: 'istatistik', label: 'İstatistik' },
@@ -30,19 +30,10 @@ const SUBJECT_OPTIONS = [
   { value: 'hayat-sigortasi', label: 'Hayat Sigortası' },
   { value: 'yangin-sigortasi', label: 'Yangın Sigortası' },
 ]
-const DIFF_OPTIONS = [
-  { value: 'easy', label: 'Kolay' },
-  { value: 'medium', label: 'Orta' },
-  { value: 'hard', label: 'Zor' },
-]
-const DIFF_COLORS: Record<string, 'green' | 'amber' | 'red'> = {
-  easy: 'green', medium: 'amber', hard: 'red',
-}
-
 type Mode = 'list' | 'edit' | 'add'
 
 interface QForm {
-  exam_type: string; subject: string; topic: string; difficulty: string
+  exam_type: string; subject: string; topic: string
   question_text: string; question_image_url: string
   opt_a: string; opt_a_img: string
   opt_b: string; opt_b_img: string
@@ -52,7 +43,7 @@ interface QForm {
 }
 
 const emptyForm = (): QForm => ({
-  exam_type: 'LEVEL_1', subject: 'matematik', topic: '', difficulty: 'medium',
+  exam_type: 'LEVEL_1', subject: 'matematik', topic: '',
   question_text: '', question_image_url: '',
   opt_a: '', opt_a_img: '',
   opt_b: '', opt_b_img: '',
@@ -78,7 +69,7 @@ const rowToForm = (r: QuestionBankRow): QForm => {
   const c = parseOpt(opts['C']); const d = parseOpt(opts['D'])
   return {
     exam_type: r.exam_type, subject: r.subject, topic: r.topic,
-    difficulty: r.difficulty, question_text: r.question_text,
+    question_text: r.question_text,
     question_image_url: r.question_image_url ?? '',
     opt_a: a.text, opt_a_img: a.image_url,
     opt_b: b.text, opt_b_img: b.image_url,
@@ -101,12 +92,10 @@ export default function QuestionBankPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [filterExam, setFilterExam] = useState('')
   const [filterSubject, setFilterSubject] = useState('')
-  const [filterDiff, setFilterDiff] = useState('')
   const [search, setSearch] = useState('')
   const [showAi, setShowAi] = useState(false)
   const [aiTopic, setAiTopic] = useState('')
   const [aiCount, setAiCount] = useState(5)
-  const [aiDiff, setAiDiff] = useState('medium')
   const [aiExam, setAiExam] = useState('LEVEL_1')
   const [aiSubject, setAiSubject] = useState('matematik')
   const [aiLoading, setAiLoading] = useState(false)
@@ -176,7 +165,6 @@ export default function QuestionBankPage() {
   const filtered = rows.filter(r => {
     if (filterExam && r.exam_type !== filterExam) return false
     if (filterSubject && r.subject !== filterSubject) return false
-    if (filterDiff && r.difficulty !== filterDiff) return false
     if (search) {
       const q = search.toLowerCase()
       if (!r.question_text.toLowerCase().includes(q) && !r.topic.toLowerCase().includes(q)) return false
@@ -194,7 +182,7 @@ export default function QuestionBankPage() {
     setSaving(true)
     const payload = {
       exam_type: form.exam_type, subject: form.subject, topic: form.topic.trim(),
-      difficulty: form.difficulty, question_text: form.question_text.trim(),
+      difficulty: 'medium', question_text: form.question_text.trim(),
       question_image_url: form.question_image_url.trim() || null,
       options_json: {
         A: { text: form.opt_a, image_url: form.opt_a_img.trim() || null },
@@ -235,8 +223,7 @@ export default function QuestionBankPage() {
     if (!aiTopic.trim()) { showToast('Konu yazın.', false); return }
     setAiLoading(true)
     try {
-      const diffLabel = DIFF_OPTIONS.find(d => d.value === aiDiff)?.label ?? aiDiff
-      const prompt = `Aktüerya sınavı (${aiExam}) için "${aiSubject}" dersinden "${aiTopic}" konusunda ${aiCount} adet ${diffLabel} zorlukta çoktan seçmeli soru üret.
+      const prompt = `Aktüerya sınavı (${aiExam}) için "${aiSubject}" dersinden "${aiTopic}" konusunda ${aiCount} adet çoktan seçmeli soru üret.
 
 Her soru JSON formatında olsun:
 [{"question_text":"...","options":{"A":"...","B":"...","C":"...","D":"..."},"correct_answer":"A","explanation":"..."}]
@@ -250,7 +237,7 @@ Sadece JSON array döndür, başka metin ekleme.`
       for (const q of aiQuestions) {
         const { error } = await supabase.from('question_bank').insert({
           exam_type: aiExam, subject: aiSubject, topic: aiTopic.trim(),
-          difficulty: aiDiff, question_text: q.question_text,
+          difficulty: 'medium', question_text: q.question_text,
           question_image_url: null,
           options_json: {
             A: { text: q.options['A'] ?? '', image_url: null },
@@ -374,7 +361,6 @@ Sadece JSON array döndür, başka metin ekleme.`
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Sınıflandırma</p>
                 <Select label="Sınav Türü" options={EXAM_OPTIONS} value={form.exam_type} onChange={setF('exam_type')} />
                 <Select label="Ders" options={SUBJECT_OPTIONS} value={form.subject} onChange={setF('subject')} />
-                <Select label="Zorluk" options={DIFF_OPTIONS} value={form.difficulty} onChange={setF('difficulty')} />
 
                 {/* Konu: topic_content'ten dropdown + manuel girme seçeneği */}
                 <div className="flex flex-col gap-1.5">
@@ -509,7 +495,6 @@ Sadece JSON array döndür, başka metin ekleme.`
                       <th className="px-3 py-2 text-left font-semibold">Konu</th>
                       <th className="px-3 py-2 text-left font-semibold">Soru</th>
                       <th className="px-3 py-2 text-left font-semibold">Sınav / Ders</th>
-                      <th className="px-3 py-2 text-left font-semibold">Zorluk</th>
                       <th className="px-3 py-2 text-left font-semibold">Doğru</th>
                     </tr>
                   </thead>
@@ -518,12 +503,7 @@ Sadece JSON array döndür, başka metin ekleme.`
                       <tr key={i} className="border-t border-slate-800">
                         <td className="px-3 py-2 text-slate-200 font-medium whitespace-nowrap">{q.topic}</td>
                         <td className="px-3 py-2 text-slate-400 max-w-md truncate" title={q.question_text}>{q.question_text}</td>
-                        <td className="px-3 py-2 text-slate-500 whitespace-nowrap">{q.exam_type} / {q.subject}</td>
-                        <td className="px-3 py-2">
-                          <Badge color={DIFF_COLORS[q.difficulty]}>
-                            {DIFF_OPTIONS.find(d => d.value === q.difficulty)?.label ?? q.difficulty}
-                          </Badge>
-                        </td>
+                        <td className="px-3 py-2 text-slate-500 whitespace-nowrap">{examLabel(q.exam_type)} / {q.subject}</td>
                         <td className="px-3 py-2 text-emerald-400 font-bold">{q.correct_answer}</td>
                       </tr>
                     ))}
@@ -548,10 +528,9 @@ Sadece JSON array döndür, başka metin ekleme.`
           <p className="text-sm font-bold text-violet-300 flex items-center gap-2">
             <Sparkles className="w-4 h-4" /> AI ile Soru Üret
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <Select label="Sınav" options={EXAM_OPTIONS} value={aiExam} onChange={e => setAiExam(e.target.value)} />
             <Select label="Ders" options={SUBJECT_OPTIONS} value={aiSubject} onChange={e => setAiSubject(e.target.value)} />
-            <Select label="Zorluk" options={DIFF_OPTIONS} value={aiDiff} onChange={e => setAiDiff(e.target.value)} />
             <Select label="Adet" value={String(aiCount)} onChange={e => setAiCount(Number(e.target.value))}
               options={[3,5,10,15,20].map(n => ({ value: String(n), label: `${n} soru` }))} />
           </div>
@@ -591,11 +570,6 @@ Sadece JSON array döndür, başka metin ekleme.`
           <option value="">Tüm Dersler</option>
           {SUBJECT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
-        <select value={filterDiff} onChange={e => setFilterDiff(e.target.value)}
-          style={FILTER_SELECT}>
-          <option value="">Tüm Zorluklar</option>
-          {DIFF_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
       </div>
 
       {loading ? (
@@ -611,7 +585,6 @@ Sadece JSON array döndür, başka metin ekleme.`
                   <th className={TH}>Konu</th>
                   <th className={TH}>Soru</th>
                   <th className={TH}>Sınav / Ders</th>
-                  <th className={TH}>Zorluk</th>
                   <th className={TH}>Durum</th>
                   <th className={TH}>İşlem</th>
                 </tr>
@@ -619,7 +592,7 @@ Sadece JSON array döndür, başka metin ekleme.`
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-600">
+                    <td colSpan={5} className="px-4 py-10 text-center text-sm text-slate-600">
                       Soru bulunamadı.
                     </td>
                   </tr>
@@ -637,13 +610,8 @@ Sadece JSON array döndür, başka metin ekleme.`
                       </div>
                     </td>
                     <td className={TD}>
-                      <p className="text-xs text-slate-400">{r.exam_type}</p>
+                      <p className="text-xs text-slate-400">{examLabel(r.exam_type)}</p>
                       <p className="text-xs text-slate-600">{r.subject}</p>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge color={DIFF_COLORS[r.difficulty]}>
-                        {DIFF_OPTIONS.find(d => d.value === r.difficulty)?.label ?? r.difficulty}
-                      </Badge>
                     </td>
                     <td className={TD}>
                       <button
