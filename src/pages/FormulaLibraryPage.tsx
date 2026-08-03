@@ -100,7 +100,7 @@ export default function FormulaLibraryPage() {
     if (!form.name.trim()) { showToast('Önce formül adını girin.', false); return }
     setAiLoading(true)
     try {
-      const prompt = `Aktüerya sınavına özgü "${form.name}" formülü için bilgi üret.
+      const prompt = `Aktüerlik sınavına özgü "${form.name}" formülü için bilgi üret.
 ${form.subject ? `Ders: ${form.subject}` : ''}
 
 JSON formatında dön:

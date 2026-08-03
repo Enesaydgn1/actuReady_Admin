@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useSiteSettings } from '@/contexts/SiteSettingsContext'
 import {
   LayoutDashboard, Users, BookOpen, FileText, Calendar,
-  ClipboardList, Settings, LogOut, Menu, ChevronRight, Sigma,
+  ClipboardList, Settings, LogOut, Menu, ChevronRight, Sigma, Trophy,
 } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -20,6 +20,7 @@ const navItems = [
   { to: '/formul-kutuphanesi', label: 'Formül Kütüph.', icon: Sigma },
   { to: '/sinav-takvimi', label: 'Sınav Takvimi',    icon: Calendar },
   { to: '/quiz-kayitlar', label: 'Quiz Kayıtları',   icon: ClipboardList },
+  { to: '/liderlik',      label: 'XP Lider Tablosu', icon: Trophy },
   { to: '/ayarlar',       label: 'Sistem Ayarları',  icon: Settings },
 ]
 

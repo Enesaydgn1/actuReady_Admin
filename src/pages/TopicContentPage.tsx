@@ -22,9 +22,26 @@ const EXAM_OPTIONS = [
 ]
 const examLabel = (v: string) => EXAM_OPTIONS.find(o => o.value === v)?.label ?? v
 const SUBJECT_OPTIONS = [
-  { value: 'matematik', label: 'Matematik' }, { value: 'istatistik', label: 'İstatistik' },
-  { value: 'mevzuat', label: 'Mevzuat' }, { value: 'olasilik', label: 'Olasılık' },
-  { value: 'hayat-sigortasi', label: 'Hayat Sigortası' }, { value: 'yangin-sigortasi', label: 'Yangın Sigortası' },
+  // LEVEL 1
+  { value: 'matematik',             label: 'Matematik (1.3)' },
+  { value: 'finansal-matematik',    label: 'Finansal Matematik (1.1)' },
+  { value: 'istatistik',            label: 'İstatistik (1.2)' },
+  { value: 'olasilik',              label: 'Olasılık (1.2)' },
+  { value: 'mevzuat',               label: 'Temel Sigortacılık ve Ekonomi (1.4)' },
+  // LEVEL 2
+  { value: 'sigorta-matematigi',    label: 'Sigorta Matematiği (2.1)' },
+  { value: 'risk-analizi',          label: 'Risk Analizi ve Aktüeryal Modelleme (2.2)' },
+  { value: 'finans-teorisi',        label: 'Finans Teorisi ve Uygulamaları (2.3)' },
+  { value: 'muhasebe',              label: 'Muhasebe ve Finansal Raporlama (2.4)' },
+  // LEVEL 3
+  { value: 'hayat-sigortalari',     label: 'Hayat Sigortaları (3.1)' },
+  { value: 'hayatdisi-sigortalar',  label: 'Hayat Dışı Sigortalar (3.2)' },
+  { value: 'saglik-sigortalari',    label: 'Sağlık Sigortaları (3.3)' },
+  { value: 'emeklilik',             label: 'Emeklilik Sistemleri (3.4)' },
+  { value: 'finans-yatirim',        label: 'Finans, Yatırım ve Risk Yönetimi (3.5)' },
+  // Legacy / TPYS
+  { value: 'hayat-sigortasi',       label: 'Hayat Sigortası (eski)' },
+  { value: 'yangin-sigortasi',      label: 'Yangın Sigortası (eski)' },
 ]
 
 type Mode = 'list' | 'edit'
@@ -104,7 +121,7 @@ export default function TopicContentPage() {
     if (!form.topic.trim()) { showToast('Önce konu adını girin.', false); return }
     setAiLoading(true)
     try {
-      const prompt = `Aktüerya sınavı (${form.exam_type}) için "${form.subject}" dersinden "${form.topic}" konusunu öğrencilere öğret.
+      const prompt = `Aktüerlik sınavı (${form.exam_type}) için "${form.subject}" dersinden "${form.topic}" konusunu öğrencilere öğret.
 
 Markdown formatında şu bölümleri içersin:
 ## Temel Kavramlar
@@ -113,9 +130,9 @@ Markdown formatında şu bölümleri içersin:
 ## Sınav İpuçları
 ## ⚡ Kritik Notlar
 
-Türkçe yaz. Aktüerya sınavına özgü içerik olsun.`
+Türkçe yaz. Aktüerlik sınavına özgü içerik olsun.`
 
-      const content = await generateText(prompt, 'Sen bir aktüerya sınavı eğitmenisin.')
+      const content = await generateText(prompt, 'Sen bir aktüerlik sınavı eğitmenisin.')
       setForm(f => ({ ...f, content_markdown: markdownToEditorHtml(content) }))
       showToast('İçerik üretildi, inceleyip kaydedin.')
     } catch (e) {

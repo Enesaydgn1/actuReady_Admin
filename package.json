@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
     "@rolldown/binding-win32-x64-msvc": "^1.0.2",
     "@supabase/supabase-js": "^2.106.2",
     "@tailwindcss/vite": "^4.3.0",
@@ -21,6 +22,7 @@
     "@tiptap/react": "^3.27.1",
     "@tiptap/starter-kit": "^3.27.1",
     "date-fns": "^4.4.0",
+    "dotenv": "^17.4.2",
     "framer-motion": "^12.42.2",
     "katex": "^0.17.0",
     "lucide-react": "^1.17.0",
@@ -28,6 +30,7 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.16.0",
+    "recharts": "^3.10.0",
     "tailwindcss": "^4.3.0",
     "xlsx": "^0.18.5"
   },

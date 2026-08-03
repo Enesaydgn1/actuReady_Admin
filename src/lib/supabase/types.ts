@@ -174,6 +174,7 @@ export interface Database {
           correct_answer: string
           explanation: string | null
           is_active: boolean
+          is_starred: boolean
           created_at: string
           updated_at: string
         }
@@ -189,6 +190,7 @@ export interface Database {
           correct_answer: string
           explanation?: string | null
           is_active?: boolean
+          is_starred?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -203,6 +205,7 @@ export interface Database {
           correct_answer?: string
           explanation?: string | null
           is_active?: boolean
+          is_starred?: boolean
           updated_at?: string
         }
       }

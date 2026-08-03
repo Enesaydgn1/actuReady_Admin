@@ -13,6 +13,7 @@ import FormulaLibraryPage from '@/pages/FormulaLibraryPage'
 import ExamCalendarAdminPage from '@/pages/ExamCalendarAdminPage'
 import QuestionsPage from '@/pages/QuestionsPage'
 import SettingsPage from '@/pages/SettingsPage'
+import LeaderboardPage from '@/pages/LeaderboardPage'
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
                 <Route path="/formul-kutuphanesi" element={<FormulaLibraryPage />} />
                 <Route path="/sinav-takvimi" element={<ExamCalendarAdminPage />} />
                 <Route path="/quiz-kayitlar" element={<QuestionsPage />} />
+                <Route path="/liderlik"      element={<LeaderboardPage />} />
                 <Route path="/ayarlar"       element={<SettingsPage />} />
               </Route>
             </Route>

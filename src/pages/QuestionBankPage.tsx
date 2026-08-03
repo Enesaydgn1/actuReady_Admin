@@ -23,12 +23,26 @@ const EXAM_OPTIONS = [
 ]
 const examLabel = (v: string) => EXAM_OPTIONS.find(o => o.value === v)?.label ?? v
 const SUBJECT_OPTIONS = [
-  { value: 'matematik', label: 'Matematik' },
-  { value: 'istatistik', label: 'İstatistik' },
-  { value: 'mevzuat', label: 'Mevzuat' },
-  { value: 'olasilik', label: 'Olasılık' },
-  { value: 'hayat-sigortasi', label: 'Hayat Sigortası' },
-  { value: 'yangin-sigortasi', label: 'Yangın Sigortası' },
+  // LEVEL 1
+  { value: 'matematik',             label: 'Matematik (1.3)' },
+  { value: 'finansal-matematik',    label: 'Finansal Matematik (1.1)' },
+  { value: 'istatistik',            label: 'İstatistik (1.2)' },
+  { value: 'olasilik',              label: 'Olasılık (1.2)' },
+  { value: 'mevzuat',               label: 'Temel Sigortacılık ve Ekonomi (1.4)' },
+  // LEVEL 2
+  { value: 'sigorta-matematigi',    label: 'Sigorta Matematiği (2.1)' },
+  { value: 'risk-analizi',          label: 'Risk Analizi ve Aktüeryal Modelleme (2.2)' },
+  { value: 'finans-teorisi',        label: 'Finans Teorisi ve Uygulamaları (2.3)' },
+  { value: 'muhasebe',              label: 'Muhasebe ve Finansal Raporlama (2.4)' },
+  // LEVEL 3
+  { value: 'hayat-sigortalari',     label: 'Hayat Sigortaları (3.1)' },
+  { value: 'hayatdisi-sigortalar',  label: 'Hayat Dışı Sigortalar (3.2)' },
+  { value: 'saglik-sigortalari',    label: 'Sağlık Sigortaları (3.3)' },
+  { value: 'emeklilik',             label: 'Emeklilik Sistemleri (3.4)' },
+  { value: 'finans-yatirim',        label: 'Finans, Yatırım ve Risk Yönetimi (3.5)' },
+  // Legacy / TPYS
+  { value: 'hayat-sigortasi',       label: 'Hayat Sigortası (eski)' },
+  { value: 'yangin-sigortasi',      label: 'Yangın Sigortası (eski)' },
 ]
 type Mode = 'list' | 'edit' | 'add'
 
@@ -223,7 +237,7 @@ export default function QuestionBankPage() {
     if (!aiTopic.trim()) { showToast('Konu yazın.', false); return }
     setAiLoading(true)
     try {
-      const prompt = `Aktüerya sınavı (${aiExam}) için "${aiSubject}" dersinden "${aiTopic}" konusunda ${aiCount} adet çoktan seçmeli soru üret.
+      const prompt = `Aktüerlik sınavı (${aiExam}) için "${aiSubject}" dersinden "${aiTopic}" konusunda ${aiCount} adet çoktan seçmeli soru üret.
 
 Her soru JSON formatında olsun:
 [{"question_text":"...","options":{"A":"...","B":"...","C":"...","D":"..."},"correct_answer":"A","explanation":"..."}]
@@ -231,7 +245,7 @@ Her soru JSON formatında olsun:
 Sadece JSON array döndür, başka metin ekleme.`
 
       type AIQ = { question_text: string; options: Record<string, string>; correct_answer: string; explanation: string }
-      const aiQuestions = await generateJSON<AIQ[]>(prompt, 'Sen bir aktüerya sınavı soru yazarısın. Sadece JSON formatında cevap ver.')
+      const aiQuestions = await generateJSON<AIQ[]>(prompt, 'Sen bir aktüerlik sınavı soru yazarısın. Sadece JSON formatında cevap ver.')
 
       let inserted = 0
       for (const q of aiQuestions) {

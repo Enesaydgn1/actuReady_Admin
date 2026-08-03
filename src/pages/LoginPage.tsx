@@ -54,7 +54,7 @@ export default function LoginPage() {
 
         <div>
           <p className="text-3xl font-black text-white leading-snug mb-3">
-            Aktüerya Sınav<br />Yönetim Paneli
+            Aktüerlik Sınav<br />Yönetim Paneli
           </p>
           <p className="text-sm text-slate-500 leading-relaxed">
             Kullanıcı yönetimi, soru bankası, konu içerikleri ve sınav takvimini tek yerden yönetin.
